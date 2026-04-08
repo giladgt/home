@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>גלעד & גל — ניהול הדירה</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#F7F5F0;--surface:#FFFFFF;--surface2:#F0EDE6;
+  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.15);
+  --text:#1A1A18;--text2:#6B6B64;--text3:#9B9B92;
+  --teal:#1D9E75;--teal-bg:#E1F5EE;--teal-text:#085041;
+  --amber:#BA7517;--amber-bg:#FAEEDA;--amber-text:#633806;
+  --red:#C0392B;--red-bg:#FCEBEB;--red-text:#791F1F;
+  --blue:#185FA5;--blue-bg:#E6F1FB;--blue-text:#0C447C;
+  --purple:#534AB7;--purple-bg:#EEEDFE;--purple-text:#3C3489;
+  --accent:#1A1A18;--radius:10px;--radius-lg:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:10px;flex-wrap:wrap}
+.logo{font-size:18px;font-weight:700;letter-spacing:-0.5px;white-space:nowrap}
+.logo span{color:var(--teal)}
+.logo small{font-weight:300;font-size:12px;color:var(--text2);margin-right:8px}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#ccc;display:inline-block;margin-left:6px;transition:background 0.3s}
+.sync-dot.live{background:var(--teal)}.sync-dot.saving{background:var(--amber)}
+.nav{display:flex;gap:4px;flex-wrap:wrap}
+.nav button{padding:6px 13px;border-radius:999px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-size:13px;font-family:'Heebo',sans-serif;transition:all 0.15s}
+.nav button.active{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:500}
+.nav button:hover:not(.active){background:var(--surface2)}
+main{max-width:920px;margin:0 auto;padding:1.5rem 1rem}
+.sec{display:none}.sec.active{display:block}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:1.5rem}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.25rem}
+.metric-label{font-size:12px;color:var(--text2);margin-bottom:4px}
+.metric-val{font-size:22px;font-weight:700}
+.metric-val.green{color:var(--teal)}.metric-val.red{color:var(--red)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:12px}
+.card-title{font-size:15px;font-weight:500;margin-bottom:1rem}
+.row-input{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.row-input input,.row-input select{flex:1;min-width:80px;padding:8px 12px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);font-size:14px;font-family:'Heebo',sans-serif;outline:none;transition:border-color 0.15s}
+.row-input input:focus,.row-input select:focus{border-color:var(--accent)}
+.row-input input[type=number]{max-width:130px}
+.btn{padding:8px 16px;border-radius:var(--radius);border:1px solid var(--border2);background:transparent;color:var(--text);cursor:pointer;font-size:13px;font-family:'Heebo',sans-serif;font-weight:500;white-space:nowrap;transition:all 0.15s}
+.btn:hover{background:var(--surface2)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.primary:hover{opacity:0.88}
+.item-row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--border);font-size:14px}
+.item-row:last-child{border-bottom:none}
+.item-text{flex:1;color:var(--text)}
+.item-text.done{text-decoration:line-through;color:var(--text3)}
+.badge{font-size:11px;padding:3px 9px;border-radius:999px;font-weight:500;white-space:nowrap}
+.badge-teal{background:var(--teal-bg);color:var(--teal-text)}
+.badge-amber{background:var(--amber-bg);color:var(--amber-text)}
+.badge-red{background:var(--red-bg);color:var(--red-text)}
+.badge-blue{background:var(--blue-bg);color:var(--blue-text)}
+.badge-purple{background:var(--purple-bg);color:var(--purple-text)}
+.badge-gray{background:var(--surface2);color:var(--text2)}
+.del{cursor:pointer;color:var(--text3);font-size:18px;line-height:1;padding:0 4px}
+.del:hover{color:var(--red)}
+input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:var(--teal);flex-shrink:0}
+.progress-bar{height:7px;background:var(--surface2);border-radius:4px;overflow:hidden;margin-top:6px}
+.progress-fill{height:100%;border-radius:4px;background:var(--teal);transition:width 0.4s}
+.progress-fill.warn{background:var(--amber)}.progress-fill.danger{background:var(--red)}
+.divider{height:1px;background:var(--border);margin:1rem 0}
+.cat-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.chart-wrap{position:relative;width:100%;height:220px;margin-top:12px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--text2);margin-top:10px}
+.leg-item{display:flex;align-items:center;gap:5px}
+.leg-sq{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.empty{color:var(--text3);font-size:13px;text-align:center;padding:1.5rem 0}
+.split-box{padding:10px 14px;background:var(--surface2);border-radius:var(--radius);font-size:14px}
+.invest-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:12px}
+.loading-overlay.hidden{display:none}
+.spinner{width:32px;height:32px;border:3px solid var(--border2);border-top-color:var(--teal);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:600px){
+  header{flex-direction:column;align-items:flex-start}
+  .nav button{font-size:12px;padding:5px 10px}
+  .metric-grid{grid-template-columns:repeat(2,1fr)}
+  #dashboard > div[style]{display:block!important}
+}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <div style="font-size:14px;color:var(--text2)">מתחבר לענן...</div>
+</div>
+
+<header>
+  <div class="logo">
+    <span>גלעד</span> & <span>גל</span>
+    <small>ניהול הדירה</small>
+    <span class="sync-dot" id="sync-dot"></span>
+  </div>
+  <nav class="nav">
+    <button class="active" onclick="switchTab('dashboard',this)">סיכום</button>
+    <button onclick="switchTab('expenses',this)">הוצאות</button>
+    <button onclick="switchTab('tasks',this)">שיפוץ</button>
+    <button onclick="switchTab('shopping',this)">קניות</button>
+    <button onclick="switchTab('invest',this)">חיסכון</button>
+  </nav>
+</header>
+
+<main>
+
+<div id="dashboard" class="sec active">
+  <div class="metric-grid" id="dash-metrics"></div>
+  <div style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px">
+    <div class="card">
+      <div class="card-title">הוצאות לפי קטגוריה</div>
+      <div class="chart-wrap"><canvas id="expChart" role="img" aria-label="גרף הוצאות">גרף</canvas></div>
+      <div class="legend" id="chart-legend"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">התקדמות שיפוץ</div>
+      <div id="dash-tasks"></div>
+      <div class="divider"></div>
+      <div class="card-title" style="margin-bottom:8px">קניות</div>
+      <div id="dash-shop"></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:0">
+    <div class="card-title">חלוקת הוצאות — גלעד vs גל</div>
+    <div id="dash-split"></div>
+  </div>
+</div>
+
+<div id="expenses" class="sec">
+  <div class="card">
+    <div class="card-title">הוספת הוצאה</div>
+    <div class="row-input">
+      <input type="text" id="exp-desc" placeholder="תיאור הוצאה" style="flex:2;min-width:120px">
+      <input type="number" id="exp-amt" placeholder="סכום ₪" step="1">
+      <select id="exp-cat">
+        <option value="שכירות">שכירות</option>
+        <option value="מזון">מזון</option>
+        <option value="חשבונות">חשבונות</option>
+        <option value="תחבורה">תחבורה</option>
+        <option value="בילויים">בילויים</option>
+        <option value="שיפוץ">שיפוץ</option>
+        <option value="אחר">אחר</option>
+      </select>
+      <select id="exp-who">
+        <option value="משותף">משותף</option>
+        <option value="גלעד">גלעד</option>
+        <option value="גל">גל</option>
+      </select>
+      <button class="btn primary" onclick="addExpense()">+ הוסף</button>
+    </div>
+    <div id="exp-list"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">חלוקת הוצאות</div>
+    <div id="split-summary"></div>
+  </div>
+</div>
+
+<div id="tasks" class="sec">
+  <div class="card">
+    <div class="card-title">הוספת משימת שיפוץ</div>
+    <div class="row-input">
+      <input type="text" id="task-name" placeholder="תיאור המשימה" style="flex:2;min-width:120px">
+      <select id="task-pri">
+        <option value="גבוהה">דחוף</option>
+        <option value="בינונית" selected>בינוני</option>
+        <option value="נמוכה">נמוך</option>
+      </select>
+      <input type="number" id="task-cost" placeholder="עלות משוערת ₪">
+      <select id="task-who">
+        <option value="שניהם">שניהם</option>
+        <option value="גלעד">גלעד</option>
+        <option value="גל">גל</option>
+      </select>
+      <button class="btn primary" onclick="addTask()">+ הוסף</button>
+    </div>
+    <div id="task-list"></div>
+  </div>
+</div>
+
+<div id="shopping" class="sec">
+  <div class="card">
+    <div class="card-title">הוספת פריט לקנייה</div>
+    <div class="row-input">
+      <input type="text" id="shop-name" placeholder="פריט" style="flex:2;min-width:100px">
+      <input type="number" id="shop-price" placeholder="מחיר ₪">
+      <select id="shop-cat">
+        <option value="מזון">מזון</option>
+        <option value="ניקיון">ניקיון</option>
+        <option value="דירה">לדירה</option>
+        <option value="אחר">אחר</option>
+      </select>
+      <select id="shop-who">
+        <option value="שניהם">שניהם</option>
+        <option value="גלעד">גלעד</option>
+        <option value="גל">גל</option>
+      </select>
+      <button class="btn primary" onclick="addShop()">+ הוסף</button>
+    </div>
+    <div id="shop-list"></div>
+    <div class="divider"></div>
+    <div id="shop-total" style="font-size:13px;color:var(--text2)"></div>
+  </div>
+</div>
+
+<div id="invest" class="sec">
+  <div class="card">
+    <div class="card-title">יעד תקציב חודשי</div>
+    <div class="row-input">
+      <input type="number" id="save-target" placeholder="תקציב הוצאות חודשי ₪" style="flex:1">
+      <input type="number" id="income-total" placeholder="הכנסה חודשית כוללת ₪" style="flex:1">
+      <button class="btn" onclick="setSaveTarget()">עדכן</button>
+    </div>
+    <div id="save-status"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">המלצות השקעה</div>
+    <div class="item-row"><span class="badge badge-teal">קרן השתלמות</span><span class="item-text" style="font-size:13px;margin-right:4px">החזר מס + תשואה — הטוב ביותר לשכיר בישראל</span></div>
+    <div class="item-row"><span class="badge badge-blue">מניות / ETF</span><span class="item-text" style="font-size:13px;margin-right:4px">השקעה לטווח ארוך דרך IRA או ברוקר</span></div>
+    <div class="item-row"><span class="badge badge-amber">פיקדון בנקאי</span><span class="item-text" style="font-size:13px;margin-right:4px">בטוח לטווח קצר עד שנה</span></div>
+    <div class="item-row"><span class="badge badge-purple">קרן נאמנות</span><span class="item-text" style="font-size:13px;margin-right:4px">פיזור סיכונים לבינוניים</span></div>
+    <div class="item-row"><span class="badge badge-gray">קריפטו</span><span class="item-text" style="font-size:13px;margin-right:4px">רק עם כסף שמסכים להפסיד</span></div>
+  </div>
+  <div class="card">
+    <div class="card-title">יעדי השקעה וחיסכון</div>
+    <div class="row-input">
+      <input type="text" id="inv-name" placeholder="שם היעד (קרן השתלמות, חופשה...)" style="flex:2;min-width:120px">
+      <input type="number" id="inv-target" placeholder="יעד ₪">
+      <input type="number" id="inv-saved" placeholder="נחסך כבר ₪">
+      <button class="btn primary" onclick="addInvGoal()">+ הוסף</button>
+    </div>
+    <div id="inv-list"></div>
+  </div>
+</div>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue, push, remove, update, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCtOIUA-hRgjolz2VYmWAlutMy5wBDn8Fg",
+  authDomain: "lodge-b2d58.firebaseapp.com",
+  databaseURL: "https://lodge-b2d58-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "lodge-b2d58",
+  storageBucket: "lodge-b2d58.firebasestorage.app",
+  messagingSenderId: "784665300803",
+  appId: "1:784665300803:web:108f2cb20b6f02dfba69f6"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const CAT_COLORS = {
+  'שכירות':'#534AB7','מזון':'#1D9E75','חשבונות':'#BA7517','תחבורה':'#378ADD',
+  'בילויים':'#D4537E','שיפוץ':'#D85A30','אחר':'#888780','ניקיון':'#639922','דירה':'#185FA5'
+};
+const PRI_CLASS = {'גבוהה':'badge-red','בינונית':'badge-amber','נמוכה':'badge-teal'};
+const PRI_LABEL = {'גבוהה':'דחוף','בינונית':'בינוני','נמוכה':'נמוך'};
+const WHO_CLASS = {'גלעד':'badge-teal','גל':'badge-purple','משותף':'badge-blue','שניהם':'badge-blue'};
+
+let state = { expenses:{}, tasks:{}, shopping:{}, invGoals:{}, settings:{saveTarget:0,income:0} };
+let chartInst = null;
+let currentTab = 'dashboard';
+
+const dot = document.getElementById('sync-dot');
+const setLive = () => dot.className = 'sync-dot live';
+const setSaving = () => dot.className = 'sync-dot saving';
+const fmt = n => '₪' + Math.round(n).toLocaleString('he-IL');
+
+window.switchTab = (id, btn) => {
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  currentTab = id;
+  if(id === 'dashboard') renderDashboard();
+};
+
+onValue(ref(db, 'home'), snap => {
+  const data = snap.val() || {};
+  state.expenses = data.expenses || {};
+  state.tasks = data.tasks || {};
+  state.shopping = data.shopping || {};
+  state.invGoals = data.invGoals || {};
+  state.settings = data.settings || { saveTarget:0, income:0 };
+  document.getElementById('loading').classList.add('hidden');
+  setLive();
+  renderExpenses(); renderTasks(); renderShopping(); renderInvest();
+  if(currentTab === 'dashboard') renderDashboard();
+}, () => {
+  document.getElementById('loading').innerHTML = '<div style="color:#C0392B;font-size:14px;text-align:center">שגיאת חיבור.<br>רענן את הדף.</div>';
+});
+
+window.addExpense = () => {
+  const desc = document.getElementById('exp-desc').value.trim();
+  const amt = parseFloat(document.getElementById('exp-amt').value);
+  if(!desc || !amt || amt <= 0) return;
+  setSaving();
+  push(ref(db,'home/expenses'), {
+    desc, amt, cat: document.getElementById('exp-cat').value,
+    who: document.getElementById('exp-who').value,
+    date: new Date().toLocaleDateString('he-IL'), ts: Date.now()
+  });
+  document.getElementById('exp-desc').value = '';
+  document.getElementById('exp-amt').value = '';
+};
+
+window.delExpense = id => { setSaving(); remove(ref(db,'home/expenses/'+id)); };
+
+const renderExpenses = () => {
+  const list = document.getElementById('exp-list');
+  const items = Object.entries(state.expenses).sort((a,b) => (b[1].ts||0)-(a[1].ts||0));
+  if(!items.length) { list.innerHTML = '<div class="empty">אין הוצאות עדיין</div>'; renderSplit(); return; }
+  list.innerHTML = items.map(([id,e]) => `
+    <div class="item-row">
+      <span class="cat-dot" style="background:${CAT_COLORS[e.cat]||'#888'}"></span>
+      <span class="item-text">${e.desc}</span>
+      <span class="badge badge-gray">${e.cat}</span>
+      <span class="badge ${WHO_CLASS[e.who]||'badge-gray'}">${e.who}</span>
+      <span style="font-weight:500;font-size:13px">${fmt(e.amt)}</span>
+      <span style="font-size:11px;color:var(--text3)">${e.date}</span>
+      <span class="del" onclick="delExpense('${id}')">×</span>
+    </div>`).join('');
+  renderSplit();
+};
+
+const renderSplit = () => {
+  const items = Object.values(state.expenses);
+  const sumS = items.filter(e=>e.who==='משותף').reduce((a,e)=>a+e.amt,0);
+  const gt = sumS/2 + items.filter(e=>e.who==='גלעד').reduce((a,e)=>a+e.amt,0);
+  const galt = sumS/2 + items.filter(e=>e.who==='גל').reduce((a,e)=>a+e.amt,0);
+  const diff = Math.abs(gt-galt);
+  document.getElementById('split-summary').innerHTML = `
+    <div class="metric-grid" style="margin-bottom:12px">
+      <div class="metric"><div class="metric-label">משותף</div><div class="metric-val">${fmt(sumS)}</div></div>
+      <div class="metric"><div class="metric-label">גלעד שילם</div><div class="metric-val">${fmt(gt)}</div></div>
+      <div class="metric"><div class="metric-label">גל שילמה</div><div class="metric-val">${fmt(galt)}</div></div>
+    </div>
+    <div class="split-box">${diff>1 ? (gt>galt?'גל חייבת לגלעד ':'גלעד חייב לגל ')+fmt(diff) : 'מאוזן לגמרי!'}</div>`;
+};
+
+window.addTask = () => {
+  const name = document.getElementById('task-name').value.trim();
+  if(!name) return;
+  setSaving();
+  push(ref(db,'home/tasks'), {
+    name, pri: document.getElementById('task-pri').value,
+    cost: parseFloat(document.getElementById('task-cost').value)||0,
+    who: document.getElementById('task-who').value, done: false, ts: Date.now()
+  });
+  document.getElementById('task-name').value = '';
+  document.getElementById('task-cost').value = '';
+};
+
+window.toggleTask = (id, done) => { setSaving(); update(ref(db,'home/tasks/'+id), {done:!done}); };
+window.delTask = id => { setSaving(); remove(ref(db,'home/tasks/'+id)); };
+
+const renderTasks = () => {
+  const el = document.getElementById('task-list');
+  const items = Object.entries(state.tasks);
+  if(!items.length) { el.innerHTML = '<div class="empty">אין משימות שיפוץ</div>'; return; }
+  const order = {'גבוהה':0,'בינונית':1,'נמוכה':2};
+  items.sort((a,b) => (a[1].done-b[1].done)||(order[a[1].pri]-order[b[1].pri]));
+  el.innerHTML = items.map(([id,t]) => `
+    <div class="item-row">
+      <input type="checkbox" ${t.done?'checked':''} onchange="toggleTask('${id}',${t.done})">
+      <span class="item-text ${t.done?'done':''}">${t.name}</span>
+      <span class="badge ${PRI_CLASS[t.pri]}">${PRI_LABEL[t.pri]}</span>
+      <span class="badge ${WHO_CLASS[t.who]||'badge-gray'}">${t.who}</span>
+      ${t.cost?`<span style="font-size:12px;color:var(--text2)">${fmt(t.cost)}</span>`:''}
+      <span class="del" onclick="delTask('${id}')">×</span>
+    </div>`).join('');
+};
+
+window.addShop = () => {
+  const name = document.getElementById('shop-name').value.trim();
+  if(!name) return;
+  setSaving();
+  push(ref(db,'home/shopping'), {
+    name, price: parseFloat(document.getElementById('shop-price').value)||0,
+    cat: document.getElementById('shop-cat').value,
+    who: document.getElementById('shop-who').value, got: false, ts: Date.now()
+  });
+  document.getElementById('shop-name').value = '';
+  document.getElementById('shop-price').value = '';
+};
+
+window.toggleShop = (id, got) => { setSaving(); update(ref(db,'home/shopping/'+id), {got:!got}); };
+window.delShop = id => { setSaving(); remove(ref(db,'home/shopping/'+id)); };
+
+const renderShopping = () => {
+  const el = document.getElementById('shop-list');
+  const items = Object.entries(state.shopping).sort((a,b) => a[1].got-b[1].got);
+  if(!items.length) { el.innerHTML = '<div class="empty">הרשימה ריקה</div>'; document.getElementById('shop-total').innerHTML=''; return; }
+  el.innerHTML = items.map(([id,s]) => `
+    <div class="item-row">
+      <input type="checkbox" ${s.got?'checked':''} onchange="toggleShop('${id}',${s.got})">
+      <span class="item-text ${s.got?'done':''}">${s.name}</span>
+      <span class="badge badge-gray">${s.cat}</span>
+      <span class="badge ${WHO_CLASS[s.who]||'badge-gray'}">${s.who}</span>
+      ${s.price?`<span style="font-size:12px;color:var(--text2)">${fmt(s.price)}</span>`:''}
+      <span class="del" onclick="delShop('${id}')">×</span>
+    </div>`).join('');
+  const vals = Object.values(state.shopping);
+  document.getElementById('shop-total').innerHTML = `סה"כ משוער: <strong>${fmt(vals.reduce((a,s)=>a+s.price,0))}</strong> | נותר לקנות: <strong>${fmt(vals.filter(s=>!s.got).reduce((a,s)=>a+s.price,0))}</strong>`;
+};
+
+window.setSaveTarget = () => {
+  setSaving();
+  set(ref(db,'home/settings'), {
+    saveTarget: parseFloat(document.getElementById('save-target').value)||0,
+    income: parseFloat(document.getElementById('income-total').value)||0
+  });
+};
+
+window.addInvGoal = () => {
+  const name = document.getElementById('inv-name').value.trim();
+  const target = parseFloat(document.getElementById('inv-target').value)||0;
+  if(!name||!target) return;
+  setSaving();
+  push(ref(db,'home/invGoals'), {
+    name, target, saved: parseFloat(document.getElementById('inv-saved').value)||0, ts: Date.now()
+  });
+  document.getElementById('inv-name').value='';
+  document.getElementById('inv-target').value='';
+  document.getElementById('inv-saved').value='';
+};
+
+window.delInvGoal = id => { setSaving(); remove(ref(db,'home/invGoals/'+id)); };
+
+const renderInvest = () => {
+  const s = state.settings;
+  if(s.saveTarget>0) document.getElementById('save-target').value = s.saveTarget;
+  if(s.income>0) document.getElementById('income-total').value = s.income;
+  const totalExp = Object.values(state.expenses).reduce((a,e)=>a+e.amt,0);
+  const st = document.getElementById('save-status');
+  if(s.saveTarget>0){
+    const pct = Math.min(100,Math.round(totalExp/s.saveTarget*100));
+    st.innerHTML = `
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text2);margin-bottom:4px;flex-wrap:wrap;gap:4px">
+        <span>הוצאות: ${fmt(totalExp)}</span><span>תקציב: ${fmt(s.saveTarget)}</span>
+        ${s.income?`<span>הכנסה: ${fmt(s.income)}</span>`:''}
+      </div>
+      <div class="progress-bar"><div class="progress-fill ${pct>100?'danger':pct>80?'warn':''}" style="width:${pct}%"></div></div>
+      <div style="font-size:12px;color:var(--text3);margin-top:4px">השתמשתם ב-${pct}% מהתקציב</div>
+      ${s.income?`<div style="margin-top:8px;font-size:13px;color:var(--teal)">פוטנציאל חיסכון: ${fmt(Math.max(0,s.income-totalExp))}</div>`:''}`;
+  } else { st.innerHTML=''; }
+
+  const invList = document.getElementById('inv-list');
+  const goals = Object.entries(state.invGoals);
+  if(!goals.length){ invList.innerHTML='<div class="empty">הוסיפו את יעד ההשקעה הראשון</div>'; return; }
+  invList.innerHTML = goals.map(([id,g]) => {
+    const pct = Math.min(100,Math.round(g.saved/g.target*100));
+    const col = pct>=50?'#1D9E75':'#BA7517';
+    return `<div class="card" style="margin-bottom:8px">
+      <div class="invest-row"><span style="font-weight:500;font-size:14px">${g.name}</span><span class="del" onclick="delInvGoal('${id}')">×</span></div>
+      <div class="invest-row" style="margin-top:4px">
+        <span style="font-size:12px;color:var(--text2)">${fmt(g.saved)} מתוך ${fmt(g.target)}</span>
+        <span style="font-size:13px;font-weight:500;color:${col}">${pct}%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${col}"></div></div>
+    </div>`;}).join('');
+};
+
+const renderDashboard = () => {
+  const expenses = Object.values(state.expenses);
+  const tasks = Object.values(state.tasks);
+  const shopping = Object.values(state.shopping);
+  const totalExp = expenses.reduce((a,e)=>a+e.amt,0);
+  const tasksDone = tasks.filter(t=>t.done).length;
+  const shopLeft = shopping.filter(s=>!s.got).length;
+  const renov = expenses.filter(e=>e.cat==='שיפוץ').reduce((a,e)=>a+e.amt,0);
+
+  document.getElementById('dash-metrics').innerHTML = `
+    <div class="metric"><div class="metric-label">סה"כ הוצאות</div><div class="metric-val">${fmt(totalExp)}</div></div>
+    <div class="metric"><div class="metric-label">שיפוץ</div><div class="metric-val">${fmt(renov)}</div></div>
+    <div class="metric"><div class="metric-label">משימות</div><div class="metric-val green">${tasksDone}/${tasks.length}</div></div>
+    <div class="metric"><div class="metric-label">לקנות עוד</div><div class="metric-val">${shopLeft}</div></div>`;
+
+  const cats={};
+  expenses.forEach(e => { cats[e.cat]=(cats[e.cat]||0)+e.amt; });
+  const labels=Object.keys(cats), data=Object.values(cats), colors=labels.map(l=>CAT_COLORS[l]||'#888');
+  document.getElementById('chart-legend').innerHTML = labels.map((l,i)=>`<span class="leg-item"><span class="leg-sq" style="background:${colors[i]}"></span>${l} ${fmt(data[i])}</span>`).join('');
+  if(chartInst) chartInst.destroy();
+  if(labels.length){
+    chartInst = new Chart(document.getElementById('expChart'),{
+      type:'doughnut',
+      data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:'#fff'}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
+    });
+  }
+
+  const dt = document.getElementById('dash-tasks');
+  if(!tasks.length) { dt.innerHTML='<div class="empty">אין משימות</div>'; }
+  else {
+    const pct = Math.round(tasksDone/tasks.length*100);
+    dt.innerHTML = `<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>${tasksDone} מתוך ${tasks.length}</span><span>${pct}%</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>`;
+  }
+
+  document.getElementById('dash-shop').innerHTML = shopLeft>0
+    ? `<div style="font-size:13px;color:var(--text2)">${shopLeft} פריטים ממתינים</div>`
+    : '<div style="font-size:13px;color:var(--teal)">כל הפריטים נקנו!</div>';
+
+  const sumS = expenses.filter(e=>e.who==='משותף').reduce((a,e)=>a+e.amt,0);
+  const gt = sumS/2 + expenses.filter(e=>e.who==='גלעד').reduce((a,e)=>a+e.amt,0);
+  const galt = sumS/2 + expenses.filter(e=>e.who==='גל').reduce((a,e)=>a+e.amt,0);
+  const diff = Math.abs(gt-galt);
+  document.getElementById('dash-split').innerHTML = `
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-label">גלעד</div><div class="metric-val">${fmt(gt)}</div></div>
+      <div class="metric"><div class="metric-label">גל</div><div class="metric-val">${fmt(galt)}</div></div>
+    </div>
+    ${diff>1?`<div class="split-box" style="margin-top:8px">${gt>galt?'גל חייבת לגלעד':'גלעד חייב לגל'}: ${fmt(diff)}</div>`:'<div style="color:var(--teal);font-size:13px;margin-top:8px">מאוזן!</div>'}`;
+};
+</script>
+</body>
+</html>
